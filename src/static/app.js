@@ -1,3 +1,27 @@
+// Function to unregister a participant
+async function unregister(activity, email) {
+  try {
+    const response = await fetch(
+      `/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const result = await response.json();
+
+    if (response.ok) {
+      // Refresh the page or find a way to refresh activities
+      location.reload(); // Simple way
+    } else {
+      alert(result.detail || "An error occurred");
+    }
+  } catch (error) {
+    alert("Failed to unregister. Please try again.");
+    console.error("Error unregistering:", error);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
@@ -25,6 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Participants:</strong></p>
+          <div class="participants-list">
+            ${details.participants.length > 0 ? details.participants.map(email => `<div class="participant"><span>${email}</span><button class="delete-btn" onclick="unregister('${name.replace(/'/g, "\\'")}', '${email.replace(/'/g, "\\'")}')">&times;</button></div>`).join('') : '<div class="participant">No participants yet</div>'}
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -41,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Handle form submission
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
